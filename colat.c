@@ -32,7 +32,7 @@
 int fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 {
 #define BADCOLOR fprintf(stderr, "\nError reading args: %s is not a valid color.\n", argv[i]); \
-	fflush(stderr);
+					fflush(stderr);
 	for (int i = 1; i < argc; i++) {
 
 		const int len = strlen(argv[i]);
@@ -152,11 +152,6 @@ int main(const int argc, const char *argv[])
 					break;
 				}
 				break;
-			case SDL_WINDOWEVENT:
-				switch (event.window.event) {
-				case SDL_WINDOWEVENT_EXPOSED:
-					break;
-				}
 			}
 		}
 	}

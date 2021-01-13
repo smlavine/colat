@@ -3,6 +3,11 @@
 Simple program to show what hexadecimal colors actually look like.
 ---
 
+# A disclaimer
+
+If I were to write this today, I would probably write it...better. But I
+didn't, and I don't have the time to go through it (yet), so here it is.
+
 # Copyright
 
 Copyright (c) 2019 Sebastian LaVine <mail@smlavine.com>

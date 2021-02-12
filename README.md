@@ -9,7 +9,7 @@ didn't, and I don't have the time to go through it (yet), so here it is.
 
 # Copyright
 
-Copyright (c) 2019 Sebastian LaVine <mail@smlavine.com>
+Copyright (c) 2019-2021 Sebastian LaVine <mail@smlavine.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

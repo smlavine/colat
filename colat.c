@@ -140,13 +140,15 @@ int main(const int argc, const char *argv[])
 				case SDLK_SPACE:
 				case SDLK_RETURN:
 				case SDLK_RIGHT:
-					// Shift to right image
+				case SDLK_j:
+					// Shift to next image
 					if (index < argc - 2)
 						index++;
 					break;
 				case SDLK_BACKSPACE:
 				case SDLK_LEFT:
-					// Shift to left image
+				case SDLK_k:
+					// Shift to previous image
 					if (index > 0)
 						index--;
 					break;

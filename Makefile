@@ -19,7 +19,7 @@ EXEC := colat
 all: $(EXEC)
 
 # recipe for building the final executable
-$(EXEC): $(OBJS) $(HDRS) makefile
+$(EXEC): $(OBJS) $(HDRS) Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS)
 
 # recipe for building object files

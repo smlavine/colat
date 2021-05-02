@@ -134,17 +134,17 @@ int main(const int argc, const char *argv[])
 			case SDL_KEYUP:
 				switch (event.key.keysym.sym) {
 				case SDLK_q:
-				case SDLK_ESCAPE:    /* FALLTHROUGH */
+				case SDLK_ESCAPE:
 					quit = 1;
 					break;
-				case SDLK_SPACE:     /* FALLTHROUGH */
+				case SDLK_SPACE:
 				case SDLK_RETURN:
 				case SDLK_RIGHT:
 					// Shift to right image
 					if (index < argc - 2)
 						index++;
 					break;
-				case SDLK_BACKSPACE: /* FALLTHROUGH */
+				case SDLK_BACKSPACE:
 				case SDLK_LEFT:
 					// Shift to left image
 					if (index > 0)

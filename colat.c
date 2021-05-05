@@ -101,7 +101,9 @@ int main(const int argc, const char *argv[])
 		return 1;
 	}
 	window = SDL_CreateWindow("colat",
-			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 400, 0);
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			400, 400,
+			SDL_WINDOW_RESIZABLE);
 	if (window == NULL) {
 		fprintf(stderr, "Error creating window: %s\n", SDL_GetError());
 		return 1;

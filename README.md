@@ -2,10 +2,7 @@
 
 Simple program to show what hexadecimal colors actually look like.
 
-# A disclaimer
-
-If I were to write this today, I would probably write it...better. But I
-didn't, and I don't have the time to go through it (yet), so here it is.
+I wrote this a long time ago, and there is much that can be improved.
 
 # Copyright
 
@@ -36,6 +33,4 @@ Colat supports "#RGB" and "#RRGGBB" syntaxes.
 
 # Building
 
-Depends on `sdl2`. I forget exactly how to install it, and I'm not going to tell
-you. You're smarter than that. A simple `make && sudo make install` should be
-all it takes to get this thing going.
+Simply run ```make```.

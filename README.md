@@ -1,4 +1,4 @@
-# colat
+# [colat](https://git.sr.ht/~smlavine/colat)
 
 Simple program to show what hexadecimal colors actually look like.
 

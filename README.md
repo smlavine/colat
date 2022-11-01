@@ -11,7 +11,7 @@ Colat supports "#RGB" and "#RRGGBB" syntaxes.
 
 # Building
 
-Simply run ```make```.
+Simply run `make`.
 
 # Copyright
 

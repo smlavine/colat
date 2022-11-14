@@ -15,6 +15,6 @@ Simply run `make`.
 
 # Copyright
 
-See [LICENSES/MIT.txt][0].
+See [LICENSE][0].
 
-[0]: https://git.sr.ht/~smlavine/colat/tree/master/item/LICENSES/MIT.txt
+[0]: https://git.sr.ht/~smlavine/colat/tree/master/item/LICENSE

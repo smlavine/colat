@@ -55,7 +55,7 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 }
 
 int
-main(const int argc, const char *argv[])
+main(int argc, char *argv[])
 {
 	// SDL objects.
 	SDL_Window *window;

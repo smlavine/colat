@@ -1,35 +1,34 @@
-# A simple makefile for compiling small SDL projects
+.POSIX:
 
-# set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -O0 -std=c99 -Wall -Wextra -Wpedantic -lm
+include config.mk
 
-# add header files here
-HDRS :=
+SRC = colat.c
+OBJ = $(SRC:.c=.o)
 
-# add source files here
-SRCS := colat.c
+all: options colat
 
-# generate names of object files
-OBJS := $(SRCS:.c=.o)
+options:
+	@echo Build options:
+	@echo "CPPFLAGS = ${CPPFLAGS}"
+	@echo "CFLAGS   = ${CFLAGS}"
+	@echo "LDFLAGS  = ${LDFLAGS}"
+	@echo "CC       = ${CC}"
+	@echo
 
-# name of executable
-EXEC := colat
+$(OBJ): config.mk
 
-# default recipe
-all: $(EXEC)
+colat: $(OBJ)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
-# recipe for building the final executable
-$(EXEC): $(OBJS) $(HDRS) Makefile
-	$(CC) -o $@ $(OBJS) $(CFLAGS)
-
-# recipe for building object files
-#$(OBJS): $(@:.o=.c) $(HDRS) makefile
-#	$(CC) -o $@ $(@:.o=.c) -c $(CFLAGS)
+clean:
+	rm -f colat $(OBJ)
 
 install:
-	cp $(EXEC) /usr/local/bin/$(exec)
-# recipe to clean the workspace
-clean:
-	rm -f $(EXEC) $(OBJS)
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp -f colat $(DESTDIR)$(PREFIX)/bin
+	chmod 755 $(DESTDIR)$(PREFIX)/bin/colat
 
-.PHONY: all clean
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/colat
+
+.PHONY: all options clean install uninstall

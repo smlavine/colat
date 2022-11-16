@@ -13,7 +13,8 @@
 
 #define CHANNEL_AMT 3
 
-int fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
+int
+fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 {
 #define BADCOLOR fprintf(stderr, "\nError reading args: %s is not a valid color.\n", argv[i]); \
 					fflush(stderr);
@@ -53,7 +54,8 @@ int fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 #undef BADCOLOR
 }
 
-int main(const int argc, const char *argv[])
+int
+main(const int argc, const char *argv[])
 {
 	// SDL objects.
 	SDL_Window *window;

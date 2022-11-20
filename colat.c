@@ -15,15 +15,6 @@
 
 #define CHANNEL_AMT 3
 
-/**
- * Prints an error message regarding the given color.
- */
-void
-badcolor(const char *c)
-{
-	fprintf(stderr, "\nError reading args: %s is not a valid color.\n", c);
-}
-
 int
 fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 {
@@ -32,7 +23,7 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 		const int len = strlen(argv[i]);
 		// If length does not match either "RGB" or "RRGGBB"
 		if (len != CHANNEL_AMT && len != CHANNEL_AMT * 2) {
-			badcolor(argv[i]);
+			warn("'%s' is not a valid color.\n", argv[i]);
 			return 1;
 		}
 		// Convert channel from hex characters to integer values.
@@ -47,7 +38,7 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 			for (int j = 0; j < channel_len; j++) {
 				char c = argv[i][chan + j];
 				if (!isxdigit(c)) {
-					badcolor(argv[i]);
+					warn("'%s' is not a valid color.\n", argv[i]);
 					return 1;
 				}
 				// Converts hex digit to decimal number equivilant,

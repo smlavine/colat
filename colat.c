@@ -11,6 +11,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "err/err.h"
+
 #define CHANNEL_AMT 3
 
 /**
@@ -72,6 +74,8 @@ main(int argc, char *argv[])
 	if (argc < 2)
 		return 0;
 
+	program_invocation_name = argv[0];
+
 	// RGB values that will be used to color the screen.
 	// colors[n][0] = R, [1] = G, [2] = B.
 	Uint8 colors[argc - 1][CHANNEL_AMT];
@@ -88,25 +92,21 @@ main(int argc, char *argv[])
 	fflush(stdout);
 
 	// Initialize all the SDL things.
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
-		return 1;
-	}
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+		err("Error initializing SDL: %s\n", SDL_GetError());
+
 	window = SDL_CreateWindow("colat",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			400, 400,
 			SDL_WINDOW_RESIZABLE);
-	if (window == NULL) {
-		fprintf(stderr, "Error creating window: %s\n", SDL_GetError());
-		return 1;
-	}
+	if (window == NULL)
+		err("Error creating window: %s\n", SDL_GetError());
 
-	renderer = SDL_CreateRenderer(window, -1,
+	renderer = SDL_CreateRenderer(
+			window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (renderer == NULL) {
-		fprintf(stderr, "Error creating renderer: %s\n", SDL_GetError());
-		return 1;
-	}
+	if (renderer == NULL)
+		err("Error creating renderer: %s\n", SDL_GetError());
 
 	// Loop through the program arguments, displaying them as hex-codes for
 	// colors. Quit on q or ESC; SPACE, ENTER or RIGHT ARROW moves to the

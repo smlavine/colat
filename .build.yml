@@ -1,0 +1,23 @@
+image: alpine/edge
+triggers:
+  - action: email
+    condition: failure
+    to: Sebastian LaVine <mail@smlavine.com>
+packages:
+  - doxygen
+  - hut
+sources:
+  - https://git.sr.ht/~smlavine/err
+environment:
+  site: err.smlavine.com
+oauth:
+  pages.sr.ht/PAGES:RW
+tasks:
+  - test: |
+      cd err/examples
+      make
+  - deploy: |
+      cd err
+      doxygen
+      tar -C site -cvz . > site.tar.gz
+      hut pages publish -d err.smlavine.com site.tar.gz

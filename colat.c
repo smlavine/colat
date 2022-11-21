@@ -20,7 +20,7 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 {
 	for (int i = 1; i < argc; i++) {
 
-		const int len = strlen(argv[i]);
+		const size_t len = strlen(argv[i]);
 		// If length does not match either "RGB" or "RRGGBB"
 		if (len != CHANNEL_AMT && len != CHANNEL_AMT * 2) {
 			warn("'%s' is not a valid color.\n", argv[i]);
@@ -30,12 +30,12 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 
 		// The length of each color in the string (the "R", or "G", or "B").
 		// Either 1 or 2, depending on 12-bit or 24-bit.
-		const int channel_len = len / CHANNEL_AMT;
+		const size_t channel_len = len / CHANNEL_AMT;
 
 		// Loop through the channels, and the chars in each channel.
-		for (int chan = 0; chan < len; chan += channel_len) {
+		for (size_t chan = 0; chan < len; chan += channel_len) {
 			// Assure channel is made up of hex chars.
-			for (int j = 0; j < channel_len; j++) {
+			for (size_t j = 0; j < channel_len; j++) {
 				char c = argv[i][chan + j];
 				if (!isxdigit(c)) {
 					warn("'%s' is not a valid color.\n", argv[i]);

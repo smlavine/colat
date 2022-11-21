@@ -71,16 +71,11 @@ main(int argc, char *argv[])
 	// colors[n][0] = R, [1] = G, [2] = B.
 	Uint8 colors[argc - 1][CHANNEL_AMT];
 	memset(colors, 0, (argc - 1) * CHANNEL_AMT * sizeof(Uint8));
-	fputs("Loading...", stdout);
-	fflush(stdout);
 	// Before initalizing SDL things, make sure the arguments are valid, and
 	// convert from string into Uint8 array.
 	// Supports "RGB" or "RRGGBB".
 	if (fill_colors(&colors, argc, argv) != 0)
 		return 1;
-	// In reference to previous "Loading..." message.
-	puts("done.");
-	fflush(stdout);
 
 	// Initialize all the SDL things.
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)

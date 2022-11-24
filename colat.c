@@ -80,17 +80,15 @@ main(int argc, char *argv[])
 	// Initialize all the SDL things.
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		err("Error initializing SDL: %s", SDL_GetError());
-
 	window = SDL_CreateWindow("colat",
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			400, 400,
-			SDL_WINDOW_RESIZABLE);
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		400, 400,
+		SDL_WINDOW_RESIZABLE);
 	if (window == NULL)
 		err("Error creating window: %s", SDL_GetError());
-
 	renderer = SDL_CreateRenderer(
-			window, -1,
-			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		window, -1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (renderer == NULL)
 		err("Error creating renderer: %s", SDL_GetError());
 
@@ -103,7 +101,7 @@ main(int argc, char *argv[])
 	while (!quit) {
 		// Update color being shown
 		SDL_SetRenderDrawColor(renderer,
-				colors[index][0], colors[index][1], colors[index][2], 0xFF);
+			colors[index][0], colors[index][1], colors[index][2], 0xFF);
 		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
 		while (SDL_PollEvent(&event)) {

@@ -16,6 +16,8 @@
 const unsigned CHANNELS = 3; // R, G, and B
 const unsigned MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
 
+// Converts an ASCII hexadecimal string to an array of Uint8s. Returns 0 on
+// success, 1 on failure.
 int
 fill_color(Uint8 color[CHANNELS], const char *s)
 {
@@ -25,24 +27,25 @@ fill_color(Uint8 color[CHANNELS], const char *s)
 		warn("'%s' is not a valid color.\n", s);
 		return 1;
 	}
-	// Convert channel from hex characters to integer values.
 
 	// The length of each color in the string (the "R", or "G", or "B").
 	// Either 1 or 2, depending on 12-bit or 24-bit.
 	const size_t channel_len = len / CHANNELS;
 
-	// Loop through the channels, and the chars in each channel.
 	for (size_t chan = 0; chan < len; chan += channel_len) {
-		// Assure channel is made up of hex chars.
 		for (size_t j = 0; j < channel_len; j++) {
 			char c = s[chan + j];
+			// Assure channel is made up of hex chars.
 			if (!isxdigit(c)) {
 				warn("'%s' is not a valid color.\n", s);
 				return 1;
 			}
-			// Converts hex digit to decimal number equivilant,
-			// multiplies it by a power of 16 to make the number places
-			// correct, and adds it to the value of the array.
+			// Converts a hex character to an integer value.
+			// We first convert the character to the numeric value
+			// it represents. Then, we multiply that by a power of
+			// 16 so that it represents the right place in the
+			// final value we are computing over the loop.
+			// TODO: use strtol instead.
 			color[chan / channel_len] +=
 				(isdigit(c) ? c - '0' : toupper(c) - 55)
 				* pow(16, channel_len == 1 ? 1 : j);

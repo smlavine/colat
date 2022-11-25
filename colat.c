@@ -13,8 +13,8 @@
 
 #include "err/err.h"
 
-const int CHANNELS = 3; // R, G, and B
-const int MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
+const unsigned CHANNELS = 3; // R, G, and B
+const unsigned MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
 
 int
 fill_colors(Uint8 colors[][CHANNELS], const int argc, const char *argv[])

@@ -17,38 +17,35 @@ const unsigned CHANNELS = 3; // R, G, and B
 const unsigned MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
 
 int
-fill_colors(Uint8 colors[][CHANNELS], const int argc, const char *argv[])
+fill_color(Uint8 color[CHANNELS], const char *s)
 {
-	for (int i = 1; i < argc; i++) {
+	const size_t len = strlen(s);
 
-		const size_t len = strlen(argv[i]);
+	if (len % CHANNELS != 0 || len > MAX_CHAN_CHARS * CHANNELS) {
+		warn("'%s' is not a valid color.\n", s);
+		return 1;
+	}
+	// Convert channel from hex characters to integer values.
 
-		if (len % CHANNELS != 0 || len > MAX_CHAN_CHARS * CHANNELS) {
-			warn("'%s' is not a valid color.\n", argv[i]);
-			return 1;
-		}
-		// Convert channel from hex characters to integer values.
+	// The length of each color in the string (the "R", or "G", or "B").
+	// Either 1 or 2, depending on 12-bit or 24-bit.
+	const size_t channel_len = len / CHANNELS;
 
-		// The length of each color in the string (the "R", or "G", or "B").
-		// Either 1 or 2, depending on 12-bit or 24-bit.
-		const size_t channel_len = len / CHANNELS;
-
-		// Loop through the channels, and the chars in each channel.
-		for (size_t chan = 0; chan < len; chan += channel_len) {
-			// Assure channel is made up of hex chars.
-			for (size_t j = 0; j < channel_len; j++) {
-				char c = argv[i][chan + j];
-				if (!isxdigit(c)) {
-					warn("'%s' is not a valid color.\n", argv[i]);
-					return 1;
-				}
-				// Converts hex digit to decimal number equivilant,
-				// multiplies it by a power of 16 to make the number places
-				// correct, and adds it to the value of the array.
-				colors[i - 1][chan / channel_len] +=
-					(isdigit(c) ? c - '0' : toupper(c) - 55)
-					* pow(16, channel_len == 1 ? 1 : j);
+	// Loop through the channels, and the chars in each channel.
+	for (size_t chan = 0; chan < len; chan += channel_len) {
+		// Assure channel is made up of hex chars.
+		for (size_t j = 0; j < channel_len; j++) {
+			char c = s[chan + j];
+			if (!isxdigit(c)) {
+				warn("'%s' is not a valid color.\n", s);
+				return 1;
 			}
+			// Converts hex digit to decimal number equivilant,
+			// multiplies it by a power of 16 to make the number places
+			// correct, and adds it to the value of the array.
+			color[chan / channel_len] +=
+				(isdigit(c) ? c - '0' : toupper(c) - 55)
+				* pow(16, channel_len == 1 ? 1 : j);
 		}
 	}
 	return 0;
@@ -75,8 +72,10 @@ main(int argc, char *argv[])
 	// Before initalizing SDL things, make sure the arguments are valid, and
 	// convert from string into Uint8 array.
 	// Supports "RGB" or "RRGGBB".
-	if (fill_colors(&colors, argc, argv) != 0)
-		return 1;
+	for (int i = 1; i < argc; i++) {
+		if (fill_color(colors[i - 1], argv[i]) != 0)
+			return 1;
+	}
 
 	// Initialize all the SDL things.
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)

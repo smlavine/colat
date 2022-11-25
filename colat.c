@@ -13,16 +13,17 @@
 
 #include "err/err.h"
 
-#define CHANNEL_AMT 3
+const int CHANNELS = 3; // R, G, and B
+const int MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
 
 int
-fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
+fill_colors(Uint8 colors[][CHANNELS], const int argc, const char *argv[])
 {
 	for (int i = 1; i < argc; i++) {
 
 		const size_t len = strlen(argv[i]);
-		// If length does not match either "RGB" or "RRGGBB"
-		if (len != CHANNEL_AMT && len != CHANNEL_AMT * 2) {
+
+		if (len % CHANNELS != 0 || len > MAX_CHAN_CHARS * CHANNELS) {
 			warn("'%s' is not a valid color.\n", argv[i]);
 			return 1;
 		}
@@ -30,7 +31,7 @@ fill_colors(Uint8 colors[][CHANNEL_AMT], const int argc, const char *argv[])
 
 		// The length of each color in the string (the "R", or "G", or "B").
 		// Either 1 or 2, depending on 12-bit or 24-bit.
-		const size_t channel_len = len / CHANNEL_AMT;
+		const size_t channel_len = len / CHANNELS;
 
 		// Loop through the channels, and the chars in each channel.
 		for (size_t chan = 0; chan < len; chan += channel_len) {
@@ -69,8 +70,8 @@ main(int argc, char *argv[])
 
 	// RGB values that will be used to color the screen.
 	// colors[n][0] = R, [1] = G, [2] = B.
-	Uint8 colors[argc - 1][CHANNEL_AMT];
-	memset(colors, 0, (argc - 1) * CHANNEL_AMT * sizeof(Uint8));
+	Uint8 colors[argc - 1][CHANNELS];
+	memset(colors, 0, (argc - 1) * CHANNELS * sizeof(Uint8));
 	// Before initalizing SDL things, make sure the arguments are valid, and
 	// convert from string into Uint8 array.
 	// Supports "RGB" or "RRGGBB".

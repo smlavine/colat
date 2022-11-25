@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 	
 	// Quit if no color arguments.
 	if (argc < 2)
-		return 0;
+		return EXIT_SUCCESS;
 
 	program_invocation_name = argv[0];
 
@@ -74,7 +74,7 @@ main(int argc, char *argv[])
 	// Supports "RGB" or "RRGGBB".
 	for (int i = 1; i < argc; i++) {
 		if (fill_color(colors[i - 1], argv[i]) != 0)
-			return 1;
+			return EXIT_FAILURE;
 	}
 
 	// Initialize all the SDL things.
@@ -140,5 +140,5 @@ main(int argc, char *argv[])
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	return 0;
+	return EXIT_SUCCESS;
 }

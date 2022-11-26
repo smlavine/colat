@@ -6,7 +6,10 @@ I wrote this a long time ago, and there is much that can be improved.
 
 # Usage
 
-`colat <colors>`
+```
+colat <colors>
+```
+
 Colat supports "#RGB" and "#RRGGBB" syntaxes.
 
 # Building

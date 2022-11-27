@@ -122,12 +122,15 @@ main(int argc, char *argv[])
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		err("Error initializing SDL: %s", SDL_GetError());
+	atexit(SDL_Quit);
+
 	window = SDL_CreateWindow("colat",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		400, 400,
 		SDL_WINDOW_RESIZABLE);
 	if (window == NULL)
 		err("Error creating window: %s", SDL_GetError());
+
 	renderer = SDL_CreateRenderer(
 		window, -1,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -175,9 +178,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	// Exit properly.
+	// Clean up SDL objects.
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	SDL_Quit();
+
 	return EXIT_SUCCESS;
 }

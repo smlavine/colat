@@ -104,7 +104,6 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 int
 main(int argc, char *argv[])
 {
-	// SDL objects.
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Event event;
@@ -115,14 +114,12 @@ main(int argc, char *argv[])
 
 	program_invocation_name = argv[0];
 
-	// RGB values that will be used to color the screen.
 	struct color colors[argc - 1];
 	for (int i = 1; i < argc; i++) {
 		if (fill_color(&colors[i - 1], argv[i]) < 0)
 			return EXIT_FAILURE;
 	}
 
-	// Initialize all the SDL things.
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		err("Error initializing SDL: %s", SDL_GetError());
 	window = SDL_CreateWindow("colat",
@@ -137,9 +134,6 @@ main(int argc, char *argv[])
 	if (renderer == NULL)
 		err("Error creating renderer: %s", SDL_GetError());
 
-	// Loop through the program arguments, displaying them as hex-codes for
-	// colors. Quit on q or ESC; SPACE, ENTER or RIGHT ARROW moves to the
-	// next color; BACKSPACE or LEFT ARROW moves to the previous color.
 	int quit = 0;
 	// Where in the colors array is being displayed.
 	int index = 0;

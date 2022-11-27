@@ -6,8 +6,8 @@
  */
 
 #include <assert.h>
-#include <SDL2/SDL.h>
 #include <limits.h>
+#include <SDL2/SDL.h>
 
 #include "debug.h"
 #include "err/err.h"

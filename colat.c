@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 
 #include "debug.h"
 #include "err/err.h"
@@ -117,6 +118,7 @@ main(int argc, char *argv[])
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Event event;
+	bool quit = false;
 	
 	// Quit if no color arguments.
 	if (argc < 2)
@@ -147,7 +149,6 @@ main(int argc, char *argv[])
 	if (renderer == NULL)
 		err("Error creating renderer: %s", SDL_GetError());
 
-	int quit = 0;
 	// Where in the colors array is being displayed.
 	int index = 0;
 	paint(renderer, colors[index]);
@@ -160,13 +161,13 @@ main(int argc, char *argv[])
 
 		switch (event.type) {
 		case SDL_QUIT:
-			quit = 1;
+			quit = true;
 			break;
 		case SDL_KEYUP:
 			switch (event.key.keysym.sym) {
 			case SDLK_q:
 			case SDLK_ESCAPE:
-				quit = 1;
+				quit = true;
 				break;
 			case SDLK_SPACE:
 			case SDLK_RETURN:

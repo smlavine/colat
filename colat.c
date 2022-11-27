@@ -146,8 +146,7 @@ main(int argc, char *argv[])
 	while (!quit) {
 		// Update color being shown
 		SDL_SetRenderDrawColor(renderer, colors[index].r,
-			colors[index].g, colors[index].b, colors[index].a
-		);
+			colors[index].g, colors[index].b, colors[index].a);
 		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
 		while (SDL_PollEvent(&event)) {

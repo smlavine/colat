@@ -7,7 +7,7 @@ PREFIX = /usr/local
 # Flags
 CPPFLAGS =
 CFLAGS = -std=c99 -Wall -Wextra `sdl2-config --cflags`
-LDFLAGS = `sdl2-config --libs` -lm
+LDFLAGS = `sdl2-config --libs`
 
 # Compiler and linker
 CC = cc

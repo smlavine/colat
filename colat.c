@@ -7,10 +7,6 @@
 
 #include <assert.h>
 #include <SDL2/SDL.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
 #include <limits.h>
 
 #include "debug.h"

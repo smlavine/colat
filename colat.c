@@ -63,15 +63,39 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	for (shift = 0; *s != '\0' && shift < MAX_SHIFT; s++, shift += NIBBLE) {
 		int x = hextoi(*s);
 		if (x < 0) {
-			warn("'%s' is not a valid color.\n", colorstr);
+			warn("'%s' contains an bad character.\n", colorstr);
 			return 1;
 		}
 		colorbits.i |= ((Uint32)x << shift);
 	}
 
-	// TODO: "doubling" nibbles on 12-bit colors
-	// TODO: error handling if the value of shift is not 12 or 24
-	// characters (12-bit/24-bit) were read.
+	switch (shift) {
+	case 12:
+		// A 12-bit color was provided. We need to "stretch"
+		// colorbits so that each nibble that was provided is doubled.
+		Uint32 mask;
+
+		// Blue channel
+		mask = (colorbits.i & (0xF << 8));
+		colorbits.i |= mask << 12;
+		colorbits.i |= mask << 8;
+
+		// Green channel
+		mask = (colorbits.i & (0xF << 4));
+		colorbits.i |= mask << 8;
+		colorbits.i |= mask << 4;
+
+		// Second half of the red channel
+		colorbits.i |= (colorbits.i & 0xF) << 4;
+
+		break;
+	case 24:
+		// A 24-bit color was provided. Nothing else needs to be done.
+		break;
+	default:
+		// A string not of length 3 or 6 was provided.
+		warn("'%s' is a bad length.\n", colorstr);
+	}
 
 	*newcolor = colorbits.c;
 	return 0;

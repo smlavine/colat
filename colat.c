@@ -102,6 +102,15 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	return 0;
 }
 
+// Helper function to paint the screen with a given color.
+void
+paint(SDL_Renderer *renderer, struct color color)
+{
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderClear(renderer);
+	SDL_RenderPresent(renderer);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -141,41 +150,45 @@ main(int argc, char *argv[])
 	int quit = 0;
 	// Where in the colors array is being displayed.
 	int index = 0;
+	paint(renderer, colors[index]);
 	while (!quit) {
-		// Update color being shown
-		SDL_SetRenderDrawColor(renderer, colors[index].r,
-			colors[index].g, colors[index].b, colors[index].a);
-		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_QUIT:
+		if (SDL_WaitEvent(&event) == 0) {
+			SDL_DestroyRenderer(renderer);
+			SDL_DestroyWindow(window);
+			err("SDL_WaitEvent() error: %s", SDL_GetError());
+		}
+
+		switch (event.type) {
+		case SDL_QUIT:
+			quit = 1;
+			break;
+		case SDL_KEYUP:
+			switch (event.key.keysym.sym) {
+			case SDLK_q:
+			case SDLK_ESCAPE:
 				quit = 1;
 				break;
-			case SDL_KEYUP:
-				switch (event.key.keysym.sym) {
-				case SDLK_q:
-				case SDLK_ESCAPE:
-					quit = 1;
-					break;
-				case SDLK_SPACE:
-				case SDLK_RETURN:
-				case SDLK_RIGHT:
-				case SDLK_j:
-					// Shift to next image
-					if (index < argc - 2)
-						index++;
-					break;
-				case SDLK_BACKSPACE:
-				case SDLK_LEFT:
-				case SDLK_k:
-					// Shift to previous image
-					if (index > 0)
-						index--;
-					break;
+			case SDLK_SPACE:
+			case SDLK_RETURN:
+			case SDLK_RIGHT:
+			case SDLK_j:
+				// Shift to next image
+				if (index < argc - 2) {
+					index++;
+					paint(renderer, colors[index]);
+				}
+				break;
+			case SDLK_BACKSPACE:
+			case SDLK_LEFT:
+			case SDLK_k:
+				// Shift to previous image
+				if (index > 0) {
+					index--;
+					paint(renderer, colors[index]);
 				}
 				break;
 			}
+			break;
 		}
 	}
 

@@ -16,9 +16,6 @@
 // Size of a half-byte; or a nibble.
 const unsigned NIBBLE = CHAR_BIT / 2;
 
-const unsigned CHANNELS = 3; // R, G, and B
-const unsigned MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
-
 struct color {
 	// The order of this struct matters; it is cast from a Uint32 in
 	// fill_color().
@@ -44,7 +41,6 @@ int
 fill_color(struct color *const restrict newcolor, const char *colorstr)
 {
 	unsigned shift;
-	const unsigned MAX_SHIFT = CHANNELS * MAX_CHAN_CHARS * NIBBLE;
 	const char *s = colorstr;
 	union {
 		struct color c;
@@ -60,8 +56,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	if (*s == '#')
 		s++;
 
-	assert(MAX_SHIFT == 24);
-	for (shift = 0; *s != '\0' && shift < MAX_SHIFT; s++, shift += NIBBLE) {
+	for (shift = 0; *s != '\0'; s++, shift += NIBBLE) {
 		int x = hextoi(*s);
 		if (x < 0) {
 			warn("'%s' contains an bad character.\n", colorstr);

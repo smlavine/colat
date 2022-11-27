@@ -60,7 +60,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 		s++;
 
 	assert(MAX_SHIFT == 24);
-	for (shift = 0; *s != '\0' && shift <= MAX_SHIFT; s++, shift += NIBBLE) {
+	for (shift = 0; *s != '\0' && shift < MAX_SHIFT; s++, shift += NIBBLE) {
 		int x = hextoi(*s);
 		if (x < 0) {
 			warn("'%s' is not a valid color.\n", colorstr);

@@ -5,6 +5,7 @@
  * See LICENSE for details.
  */
 
+#include <assert.h>
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -65,6 +66,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	if (*s == '#')
 		s++;
 
+	assert(MAX_SHIFT == 24);
 	for (shift = 0; *s != '\0' && shift <= MAX_SHIFT; s++, shift += NIBBLE) {
 		int x = hextoi(*s);
 		if (x < 0) {

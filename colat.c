@@ -10,47 +10,87 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
+#include "debug.h"
 #include "err/err.h"
+
+// Size of a half-byte; or a nibble.
+const unsigned NIBBLE = CHAR_BIT / 2;
 
 const unsigned CHANNELS = 3; // R, G, and B
 const unsigned MAX_CHAN_CHARS = 2; // Allow rgb or rrggbb
 
-// Converts an ASCII hexadecimal string to an array of Uint8s. Returns 0 on
-// success, 1 on failure.
+struct color {
+	// The order of this struct matters; it is cast from a Uint32 in
+	// fill_color().
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
+	Uint8 a;
+};
+
+// Converts a hexadecimal char to an integer. If the provided char is
+// not hexadecimal, then a negative value is returned.
 int
-fill_color(Uint8 color[CHANNELS], const char *s)
+hextoi(char c)
 {
-	const size_t len = strlen(s);
+	if (!isxdigit(c))
+		return -1;
+	return (isdigit(c) ? c - '0' : toupper(c) - 55);
+}
 
-	if (len % CHANNELS != 0 || len > MAX_CHAN_CHARS * CHANNELS) {
-		warn("'%s' is not a valid color.\n", s);
-		return 1;
-	}
+// Parses a hexadecimal string s into a color that is stored in
+// newcolor. Returns 0 on success, negative on failure.
+int
+fill_color(struct color *const restrict newcolor, const char *colorstr)
+{
+	unsigned shift;
+	const unsigned MAX_SHIFT = CHANNELS * MAX_CHAN_CHARS * NIBBLE;
+	const char *s = colorstr;
+	union {
+		struct color c;
+		Uint32 i;
+	} colorbits = { .c = {
+		.r = 0,
+		.g = 0,
+		.b = 0,
+		.a = SDL_ALPHA_OPAQUE
+	} };
 
-	// The length of each color in the string (the "R", or "G", or "B").
-	// Either 1 or 2, depending on 12-bit or 24-bit.
-	const size_t channel_len = len / CHANNELS;
+	printf("colorbits to start:\n");
+	print32asbinary(colorbits.i);
 
-	for (size_t chan = 0; chan < len; chan += channel_len) {
-		for (size_t j = 0; j < channel_len; j++) {
-			char c = s[chan + j];
-			// Assure channel is made up of hex chars.
-			if (!isxdigit(c)) {
-				warn("'%s' is not a valid color.\n", s);
-				return 1;
-			}
-			// Converts a hex character to an integer value.
-			// We first convert the character to the numeric value
-			// it represents. Then, we multiply that by a power of
-			// 16 so that it represents the right place in the
-			// final value we are computing over the loop.
-			// TODO: use strtol instead.
-			color[chan / channel_len] +=
-				(isdigit(c) ? c - '0' : toupper(c) - 55)
-				* pow(16, channel_len == 1 ? 1 : j);
+	// Allow for colors to begin like "#fff".
+	if (*s == '#')
+		s++;
+
+	for (shift = 0; *s != '\0' && shift <= MAX_SHIFT; s++, shift += NIBBLE) {
+		int x = hextoi(*s);
+		if (x < 0) {
+			warn("'%s' is not a valid color.\n", colorstr);
+			return 1;
 		}
+		printf("x=%d\n", x);
+		printf("x\t");
+		print32asbinary(x);
+		printf("x shift\t");
+		print32asbinary((Uint32)x << shift);
+		printf("before\t");
+		print32asbinary(colorbits.i);
+		colorbits.i |= ((Uint32)x << shift);
+		printf("after\t");
+		print32asbinary(colorbits.i);
 	}
+
+	// TODO: "doubling" nibbles on 12-bit colors
+	// TODO: error handling if the value of shift is not 12 or 24
+	// characters (12-bit/24-bit) were read.
+
+	printf("finally\t");
+	print32asbinary(colorbits.i);
+
+	*newcolor = colorbits.c;
 	return 0;
 }
 
@@ -69,14 +109,9 @@ main(int argc, char *argv[])
 	program_invocation_name = argv[0];
 
 	// RGB values that will be used to color the screen.
-	// colors[n][0] = R, [1] = G, [2] = B.
-	Uint8 colors[argc - 1][CHANNELS];
-	memset(colors, 0, (argc - 1) * CHANNELS * sizeof(Uint8));
-	// Before initalizing SDL things, make sure the arguments are valid, and
-	// convert from string into Uint8 array.
-	// Supports "RGB" or "RRGGBB".
+	struct color colors[argc - 1];
 	for (int i = 1; i < argc; i++) {
-		if (fill_color(colors[i - 1], argv[i]) != 0)
+		if (fill_color(&colors[i - 1], argv[i]) < 0)
 			return EXIT_FAILURE;
 	}
 
@@ -103,8 +138,9 @@ main(int argc, char *argv[])
 	int index = 0;
 	while (!quit) {
 		// Update color being shown
-		SDL_SetRenderDrawColor(renderer,
-			colors[index][0], colors[index][1], colors[index][2], 0xFF);
+		SDL_SetRenderDrawColor(renderer, colors[index].r,
+			colors[index].g, colors[index].b, colors[index].a
+		);
 		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
 		while (SDL_PollEvent(&event)) {

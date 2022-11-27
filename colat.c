@@ -59,9 +59,6 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 		.a = SDL_ALPHA_OPAQUE
 	} };
 
-	printf("colorbits to start:\n");
-	print32asbinary(colorbits.i);
-
 	// Allow for colors to begin like "#fff".
 	if (*s == '#')
 		s++;
@@ -73,24 +70,12 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 			warn("'%s' is not a valid color.\n", colorstr);
 			return 1;
 		}
-		printf("x=%d\n", x);
-		printf("x\t");
-		print32asbinary(x);
-		printf("x shift\t");
-		print32asbinary((Uint32)x << shift);
-		printf("before\t");
-		print32asbinary(colorbits.i);
 		colorbits.i |= ((Uint32)x << shift);
-		printf("after\t");
-		print32asbinary(colorbits.i);
 	}
 
 	// TODO: "doubling" nibbles on 12-bit colors
 	// TODO: error handling if the value of shift is not 12 or 24
 	// characters (12-bit/24-bit) were read.
-
-	printf("finally\t");
-	print32asbinary(colorbits.i);
 
 	*newcolor = colorbits.c;
 	return 0;

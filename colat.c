@@ -64,7 +64,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 		int x = hextoi(*s);
 		if (x < 0) {
 			warn("'%s' contains an bad character.\n", colorstr);
-			return 1;
+			return -1;
 		}
 		colorbits.i |= ((Uint32)x << shift);
 	}
@@ -95,6 +95,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	default:
 		// A string not of length 3 or 6 was provided.
 		warn("'%s' is a bad length.\n", colorstr);
+		return -1;
 	}
 
 	*newcolor = colorbits.c;

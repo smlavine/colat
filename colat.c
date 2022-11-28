@@ -157,8 +157,10 @@ main(int argc, char *argv[])
 	renderer = SDL_CreateRenderer(
 		window, -1,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (renderer == NULL)
+	if (renderer == NULL) {
+		SDL_DestroyWindow(window);
 		err("Error creating renderer: %s", SDL_GetError());
+	}
 
 	// Where in the colors array is being displayed.
 	int index = 0;

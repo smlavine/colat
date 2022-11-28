@@ -154,8 +154,7 @@ main(int argc, char *argv[])
 	if (window == NULL)
 		err("Error creating window: %s", SDL_GetError());
 
-	renderer = SDL_CreateRenderer(
-		window, -1,
+	renderer = SDL_CreateRenderer(window, -1,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (renderer == NULL) {
 		SDL_DestroyWindow(window);

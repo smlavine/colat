@@ -25,6 +25,18 @@ struct color {
 	Uint8 a;
 };
 
+// Possible return values for fill_color().
+enum fill_color_status {
+	// fill_color() completed successfully.
+	FILL_COLOR_OK,
+	// fill_color() failed because the provided string contained a
+	// non-hexadecimal character.
+	FILL_COLOR_NOT_HEX,
+	// fill_color() failed because the provided string was not the correct
+	// size for a 12-bit or 24-bit color.
+	FILL_COLOR_BAD_SIZE,
+};
+
 // Converts a hexadecimal char to an integer. If the provided char is
 // not hexadecimal, then a negative value is returned.
 int
@@ -35,14 +47,13 @@ hextoi(char c)
 	return (isdigit(c) ? c - '0' : toupper(c) - 55);
 }
 
-// Parses a hexadecimal string s into a color that is stored in
-// newcolor. Returns 0 on success, negative on failure.
-int
-fill_color(struct color *const restrict newcolor, const char *colorstr)
+// Fills newcolor with the color represented by the provided string.
+// See the definition of fill_color_status for the meaning of return values.
+enum fill_color_status
+fill_color(struct color *const restrict newcolor, const char *s)
 {
 	unsigned shift;
 	Uint32 mask;
-	const char *s = colorstr;
 	union {
 		struct color c;
 		Uint32 i;
@@ -60,8 +71,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	for (shift = 0; *s != '\0'; s++, shift += NIBBLE) {
 		int x = hextoi(*s);
 		if (x < 0) {
-			warn("'%s' contains an bad character.\n", colorstr);
-			return -1;
+			return FILL_COLOR_NOT_HEX;
 		}
 		colorbits.i |= ((Uint32)x << shift);
 	}
@@ -89,9 +99,7 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 		// A 24-bit color was provided. Nothing else needs to be done.
 		break;
 	default:
-		// A string not of length 3 or 6 was provided.
-		warn("'%s' is a bad length.\n", colorstr);
-		return -1;
+		return FILL_COLOR_BAD_SIZE;
 	}
 
 	*newcolor = colorbits.c;
@@ -123,8 +131,16 @@ main(int argc, char *argv[])
 
 	struct color colors[argc - 1];
 	for (int i = 1; i < argc; i++) {
-		if (fill_color(&colors[i - 1], argv[i]) < 0)
+		switch (fill_color(&colors[i - 1], argv[i])) {
+		case FILL_COLOR_OK:
+			break;
+		case FILL_COLOR_NOT_HEX:
+			warn("'%s' contains a bad character.\n", argv[i]);
 			return EXIT_FAILURE;
+		case FILL_COLOR_BAD_SIZE:
+			warn("'%s' is not a valid length.\n", argv[i]);
+			return EXIT_FAILURE;
+		}
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)

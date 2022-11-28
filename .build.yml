@@ -1,0 +1,21 @@
+image: alpine/edge
+triggers:
+  - action: email
+    condition: failure
+    to: Sebastian LaVine <mail@smlavine.com>
+packages:
+  - sdl2-dev
+  - gcc
+  - clang
+sources:
+  - https://git.sr.ht/~smlavine/colat
+tasks:
+  - gcc: |
+      cd colat
+      sed -i 's/CC = .*/CC = gcc/' config.mk
+      make
+  - clang: |
+      cd colat
+      sed -i 's/CC = .*/CC = clang/' config.mk
+      make clean
+      make

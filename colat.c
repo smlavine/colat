@@ -41,6 +41,7 @@ int
 fill_color(struct color *const restrict newcolor, const char *colorstr)
 {
 	unsigned shift;
+	Uint32 mask;
 	const char *s = colorstr;
 	union {
 		struct color c;
@@ -69,7 +70,6 @@ fill_color(struct color *const restrict newcolor, const char *colorstr)
 	case 12:
 		// A 12-bit color was provided. We need to "stretch"
 		// colorbits so that each nibble that was provided is doubled.
-		Uint32 mask;
 
 		// Blue channel
 		mask = (colorbits.i & (0xF << 8));

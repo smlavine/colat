@@ -5,11 +5,12 @@
  * See LICENSE for details.
  */
 
-#include <string.h>
 #include <assert.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "debug.h"
 #include "err/err.h"
@@ -104,11 +105,12 @@ fill_color(struct color *const restrict newcolor, const char *s)
 
 // Helper function to paint the screen with a given color.
 void
-paint(SDL_Renderer *renderer, struct color color)
+paint(SDL_Renderer *renderer, struct color color, const char *colorstr)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
+	puts(colorstr);
 }
 
 int
@@ -159,7 +161,7 @@ main(int argc, char *argv[])
 
 	// Where in the colors array is being displayed.
 	int index = 0;
-	paint(renderer, colors[index]);
+	paint(renderer, colors[index], argv[index + 1]);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
 			SDL_DestroyRenderer(renderer);
@@ -184,7 +186,8 @@ main(int argc, char *argv[])
 				// Shift to next image
 				if (index < argc - 2) {
 					index++;
-					paint(renderer, colors[index]);
+					paint(renderer, colors[index],
+						argv[index + 1]);
 				}
 				break;
 			case SDLK_BACKSPACE:
@@ -193,7 +196,8 @@ main(int argc, char *argv[])
 				// Shift to previous image
 				if (index > 0) {
 					index--;
-					paint(renderer, colors[index]);
+					paint(renderer, colors[index],
+						argv[index + 1]);
 				}
 				break;
 			}

@@ -105,12 +105,11 @@ fill_color(struct color *const restrict newcolor, const char *s)
 
 // Helper function to paint the screen with a given color.
 void
-paint(SDL_Renderer *renderer, struct color color, const char *colorstr)
+paint(SDL_Renderer *renderer, struct color color)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
-	puts(colorstr);
 }
 
 // Run the main loop. On success, 0 is returned. On error, an error message is
@@ -122,7 +121,7 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 	bool quit = false;
 	size_t index = 0;
 
-	paint(r, colors[index], names[index]);
+	paint(r, colors[index]);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
 			ewarn("SDL_WaitEvent() error: %s", SDL_GetError());
@@ -138,7 +137,7 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 			case SDL_WINDOWEVENT_EXPOSED:
 			case SDL_WINDOWEVENT_RESIZED:
 			case SDL_WINDOWEVENT_MOVED:
-				paint(r, colors[index], names[index]);
+				paint(r, colors[index]);
 				break;
 			}
 			break;
@@ -155,7 +154,8 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 				// Shift to next image
 				if (index < n - 1) {
 					index++;
-					paint(r, colors[index], names[index]);
+					paint(r, colors[index]);
+					puts(names[index]);
 				}
 				break;
 			case SDLK_BACKSPACE:
@@ -164,7 +164,8 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 				// Shift to previous image
 				if (index > 0) {
 					index--;
-					paint(r, colors[index], names[index]);
+					paint(r, colors[index]);
+					puts(names[index]);
 				}
 				break;
 			}

@@ -133,6 +133,15 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 		case SDL_QUIT:
 			quit = true;
 			break;
+		case SDL_WINDOWEVENT:
+			switch (event.window.event) {
+			case SDL_WINDOWEVENT_EXPOSED:
+			case SDL_WINDOWEVENT_RESIZED:
+			case SDL_WINDOWEVENT_MOVED:
+				paint(r, colors[index], names[index]);
+				break;
+			}
+			break;
 		case SDL_KEYUP:
 			switch (event.key.keysym.sym) {
 			case SDLK_q:

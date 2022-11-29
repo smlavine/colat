@@ -5,6 +5,7 @@
  * See LICENSE for details.
  */
 
+#include <string.h>
 #include <assert.h>
 #include <limits.h>
 #include <SDL2/SDL.h>

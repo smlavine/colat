@@ -113,13 +113,65 @@ paint(SDL_Renderer *renderer, struct color color, const char *colorstr)
 	puts(colorstr);
 }
 
+// Run the main loop. On success, 0 is returned. On error, an error message is
+// printed and -1 is returned.
+int
+run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
+{
+	SDL_Event event;
+	bool quit = false;
+	size_t index = 0;
+
+	paint(r, colors[index], names[index]);
+	while (!quit) {
+		if (SDL_WaitEvent(&event) == 0) {
+			ewarn("SDL_WaitEvent() error: %s", SDL_GetError());
+			return -1;
+		}
+
+		switch (event.type) {
+		case SDL_QUIT:
+			quit = true;
+			break;
+		case SDL_KEYUP:
+			switch (event.key.keysym.sym) {
+			case SDLK_q:
+			case SDLK_ESCAPE:
+				quit = true;
+				break;
+			case SDLK_SPACE:
+			case SDLK_RETURN:
+			case SDLK_RIGHT:
+			case SDLK_j:
+				// Shift to next image
+				if (index < n - 1) {
+					index++;
+					paint(r, colors[index], names[index]);
+				}
+				break;
+			case SDLK_BACKSPACE:
+			case SDLK_LEFT:
+			case SDLK_k:
+				// Shift to previous image
+				if (index > 0) {
+					index--;
+					paint(r, colors[index], names[index]);
+				}
+				break;
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-	SDL_Event event;
-	bool quit = false;
+	int ret;
 	
 	// Quit if no color arguments.
 	if (argc < 2)
@@ -159,55 +211,15 @@ main(int argc, char *argv[])
 		err("Error creating renderer: %s", SDL_GetError());
 	}
 
-	// Where in the colors array is being displayed.
-	int index = 0;
-	paint(renderer, colors[index], argv[index + 1]);
-	while (!quit) {
-		if (SDL_WaitEvent(&event) == 0) {
-			SDL_DestroyRenderer(renderer);
-			SDL_DestroyWindow(window);
-			err("SDL_WaitEvent() error: %s", SDL_GetError());
-		}
-
-		switch (event.type) {
-		case SDL_QUIT:
-			quit = true;
-			break;
-		case SDL_KEYUP:
-			switch (event.key.keysym.sym) {
-			case SDLK_q:
-			case SDLK_ESCAPE:
-				quit = true;
-				break;
-			case SDLK_SPACE:
-			case SDLK_RETURN:
-			case SDLK_RIGHT:
-			case SDLK_j:
-				// Shift to next image
-				if (index < argc - 2) {
-					index++;
-					paint(renderer, colors[index],
-						argv[index + 1]);
-				}
-				break;
-			case SDLK_BACKSPACE:
-			case SDLK_LEFT:
-			case SDLK_k:
-				// Shift to previous image
-				if (index > 0) {
-					index--;
-					paint(renderer, colors[index],
-						argv[index + 1]);
-				}
-				break;
-			}
-			break;
-		}
+	if (run(renderer, colors, &argv[1], argc - 1) == 0) {
+		ret = EXIT_SUCCESS;
+	} else {
+		ret = EXIT_FAILURE;
 	}
 
 	// Clean up SDL objects.
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 
-	return EXIT_SUCCESS;
+	return ret;
 }

@@ -122,6 +122,7 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 	size_t index = 0;
 
 	paint(r, colors[index]);
+	puts(names[index]);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
 			ewarn("SDL_WaitEvent() error: %s", SDL_GetError());

@@ -52,8 +52,8 @@ hextoi(char c)
 enum fill_color_status
 fill_color(struct color *const restrict newcolor, const char *s)
 {
+	size_t len;
 	unsigned shift;
-	Uint32 mask;
 	union {
 		struct color c;
 		Uint32 i;
@@ -68,35 +68,30 @@ fill_color(struct color *const restrict newcolor, const char *s)
 	if (*s == '#')
 		s++;
 
-	for (shift = 0; *s != '\0'; s++, shift += NIBBLE) {
-		int x = hextoi(*s);
-		if (x < 0) {
-			return FILL_COLOR_NOT_HEX;
+	len = strlen(s);
+	switch (len) {
+	case 3:
+		for (shift = 0; *s != '\0'; s++, shift += CHAR_BIT) {
+			int x = hextoi(*s);
+			if (x < 0) {
+				return FILL_COLOR_NOT_HEX;
+			}
+			// 12-bit color, so set both halves of the bytes with
+			// the hexadecimal character found.
+			colorbits.i |= ((Uint32)x << shift)
+				| ((Uint32)x << (shift + NIBBLE));
 		}
-		colorbits.i |= ((Uint32)x << shift);
-	}
-
-	switch (shift) {
-	case 12:
-		// A 12-bit color was provided. We need to "stretch"
-		// colorbits so that each nibble that was provided is doubled.
-
-		// Blue channel
-		mask = (colorbits.i & (0xF << 8));
-		colorbits.i |= mask << 12;
-		colorbits.i |= mask << 8;
-
-		// Green channel
-		mask = (colorbits.i & (0xF << 4));
-		colorbits.i |= mask << 8;
-		colorbits.i |= mask << 4;
-
-		// Second half of the red channel
-		colorbits.i |= (colorbits.i & 0xF) << 4;
-
 		break;
-	case 24:
-		// A 24-bit color was provided. Nothing else needs to be done.
+	case 6:
+		for (shift = NIBBLE; *s != '\0'; s += 2, shift += CHAR_BIT) {
+			int x1 = hextoi(*s), x2 = hextoi(*(s + 1));
+			if (x1 < 0 || x2 < 0) {
+				return FILL_COLOR_NOT_HEX;
+			}
+			// 24-bit color
+			colorbits.i |= ((Uint32)x1 << shift)
+				| ((Uint32)x2 << (shift - NIBBLE));
+		}
 		break;
 	default:
 		return FILL_COLOR_BAD_SIZE;

@@ -196,10 +196,10 @@ main(int argc, char *argv[])
 		case FILL_COLOR_OK:
 			break;
 		case FILL_COLOR_NOT_HEX:
-			warn("'%s' contains a bad character.\n", argv[i]);
+			warn("%s contains a bad character.\n", argv[i]);
 			return EXIT_FAILURE;
 		case FILL_COLOR_BAD_SIZE:
-			warn("'%s' is not a valid length.\n", argv[i]);
+			warn("%s is not a valid length.\n", argv[i]);
 			return EXIT_FAILURE;
 		}
 	}

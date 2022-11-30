@@ -51,8 +51,12 @@ hextoi(char c)
 enum fill_color_status
 fill_color(struct color *const restrict newcolor, const char *s)
 {
-	const unsigned NIBBLE = CHAR_BIT / 2; // Size of a half-byte
-	size_t len;
+	enum {
+		_12BITLEN = 3,
+		_24BITLEN = 6,
+		CHANNELS  = 3,
+		NIBBLE    = CHAR_BIT / 2,
+	};
 	unsigned shift;
 	union {
 		struct color c;
@@ -68,27 +72,25 @@ fill_color(struct color *const restrict newcolor, const char *s)
 	if (*s == '#')
 		s++;
 
-	len = strlen(s);
-	switch (len) {
-	case 3:
+	assert(_12BITLEN == 3 && _24BITLEN == 6 && CHANNELS == 3);
+	switch (strnlen(s, _24BITLEN + 1)) {
+	case _12BITLEN:
 		for (shift = 0; *s != '\0'; s++, shift += CHAR_BIT) {
 			int x = hextoi(*s);
 			if (x < 0) {
 				return FILL_COLOR_NOT_HEX;
 			}
-			// 12-bit color, so set both halves of the bytes with
-			// the hexadecimal character found.
 			colorbits.i |= ((Uint32)x << shift)
 				| ((Uint32)x << (shift + NIBBLE));
 		}
 		break;
-	case 6:
-		for (shift = NIBBLE; *s != '\0'; s += 2, shift += CHAR_BIT) {
+	case _24BITLEN:
+		for (shift = NIBBLE; *s != '\0';
+				s += _24BITLEN / CHANNELS, shift += CHAR_BIT) {
 			int x1 = hextoi(*s), x2 = hextoi(*(s + 1));
 			if (x1 < 0 || x2 < 0) {
 				return FILL_COLOR_NOT_HEX;
 			}
-			// 24-bit color
 			colorbits.i |= ((Uint32)x1 << shift)
 				| ((Uint32)x2 << (shift - NIBBLE));
 		}

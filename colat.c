@@ -57,7 +57,6 @@ fill_color(struct color *const restrict newcolor, const char *s)
 		CHANNELS  = 3,
 		NIBBLE    = CHAR_BIT / 2,
 	};
-	unsigned shift;
 	union {
 		struct color c;
 		Uint32 i;
@@ -75,7 +74,7 @@ fill_color(struct color *const restrict newcolor, const char *s)
 	assert(_12BITLEN == 3 && _24BITLEN == 6 && CHANNELS == 3);
 	switch (strnlen(s, _24BITLEN + 1)) {
 	case _12BITLEN:
-		for (shift = 0; *s != '\0'; s++, shift += CHAR_BIT) {
+		for (unsigned shift = 0; *s != '\0'; s++, shift += CHAR_BIT) {
 			int x = hextoi(*s);
 			if (x < 0) {
 				return FILL_COLOR_NOT_HEX;
@@ -85,7 +84,7 @@ fill_color(struct color *const restrict newcolor, const char *s)
 		}
 		break;
 	case _24BITLEN:
-		for (shift = NIBBLE; *s != '\0';
+		for (unsigned shift = NIBBLE; *s != '\0';
 				s += _24BITLEN / CHANNELS, shift += CHAR_BIT) {
 			int x1 = hextoi(*s), x2 = hextoi(*(s + 1));
 			if (x1 < 0 || x2 < 0) {

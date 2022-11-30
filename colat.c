@@ -15,9 +15,6 @@
 #include "debug.h"
 #include "err/err.h"
 
-// Size of a half-byte; or a nibble.
-const unsigned NIBBLE = CHAR_BIT / 2;
-
 struct color {
 	// The order of this struct matters; it is cast from a Uint32 in
 	// fill_color().
@@ -54,6 +51,7 @@ hextoi(char c)
 enum fill_color_status
 fill_color(struct color *const restrict newcolor, const char *s)
 {
+	const unsigned NIBBLE = CHAR_BIT / 2; // Size of a half-byte
 	size_t len;
 	unsigned shift;
 	union {

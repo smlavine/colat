@@ -24,6 +24,11 @@ struct color {
 	Uint8 a;
 };
 
+struct colorinfo {
+	struct color c;
+	const char *s;
+};
+
 // Possible return values for fill_color().
 enum fill_color_status {
 	// fill_color() completed successfully.
@@ -49,7 +54,7 @@ hextoi(char c)
 // Fills newcolor with the color represented by the provided string.
 // See the definition of fill_color_status for the meaning of return values.
 enum fill_color_status
-fill_color(struct color *const restrict newcolor, const char *s)
+fill_color(struct colorinfo *const restrict newcolor, const char *name)
 {
 	enum {
 		_12BITLEN = 3,
@@ -57,6 +62,7 @@ fill_color(struct color *const restrict newcolor, const char *s)
 		CHANNELS  = 3,
 		NIBBLE    = CHAR_BIT / 2,
 	};
+	const char *s = name;
 	union {
 		struct color c;
 		Uint32 i;
@@ -98,7 +104,8 @@ fill_color(struct color *const restrict newcolor, const char *s)
 		return FILL_COLOR_BAD_SIZE;
 	}
 
-	*newcolor = colorbits.c;
+	newcolor->c = colorbits.c;
+	newcolor->s = name;
 	return 0;
 }
 
@@ -114,14 +121,14 @@ paint(SDL_Renderer *renderer, struct color color)
 // Run the main loop. On success, 0 is returned. On error, an error message is
 // printed and -1 is returned.
 int
-run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
+run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 {
 	SDL_Event event;
 	bool quit = false;
 	size_t index = 0;
 
-	paint(r, colors[index]);
-	puts(names[index]);
+	paint(r, colors[index].c);
+	puts(colors[index].s);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
 			ewarn("SDL_WaitEvent() error: %s", SDL_GetError());
@@ -137,7 +144,7 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 			case SDL_WINDOWEVENT_EXPOSED:
 			case SDL_WINDOWEVENT_RESIZED:
 			case SDL_WINDOWEVENT_MOVED:
-				paint(r, colors[index]);
+				paint(r, colors[index].c);
 				break;
 			}
 			break;
@@ -154,8 +161,8 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 				// Shift to next image
 				if (index < n - 1) {
 					index++;
-					paint(r, colors[index]);
-					puts(names[index]);
+					paint(r, colors[index].c);
+					puts(colors[index].s);
 				}
 				break;
 			case SDLK_BACKSPACE:
@@ -164,8 +171,8 @@ run(SDL_Renderer *r, const struct color *colors, char *names[], size_t n)
 				// Shift to previous image
 				if (index > 0) {
 					index--;
-					paint(r, colors[index]);
-					puts(names[index]);
+					paint(r, colors[index].c);
+					puts(colors[index].s);
 				}
 				break;
 			}
@@ -189,7 +196,7 @@ main(int argc, char *argv[])
 
 	program_invocation_name = argv[0];
 
-	struct color colors[argc - 1];
+	struct colorinfo colors[argc - 1];
 	for (int i = 1; i < argc; i++) {
 		switch (fill_color(&colors[i - 1], argv[i])) {
 		case FILL_COLOR_OK:
@@ -221,7 +228,7 @@ main(int argc, char *argv[])
 		err("Error creating renderer: %s", SDL_GetError());
 	}
 
-	if (run(renderer, colors, &argv[1], argc - 1) == 0) {
+	if (run(renderer, colors, argc - 1) == 0) {
 		ret = EXIT_SUCCESS;
 	} else {
 		ret = EXIT_FAILURE;

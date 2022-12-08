@@ -189,7 +189,7 @@ main(int argc, char *argv[])
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	int ret;
-	
+
 	// Quit if no color arguments.
 	if (argc < 2)
 		return EXIT_SUCCESS;

@@ -46,9 +46,15 @@ enum fill_color_status {
 int
 hextoi(char c)
 {
-	if (!isxdigit(c))
+	if ('0' <= c && c <= '9') {
+		return c - '0';
+	} else if ('A' <= c && c <= 'F') {
+		return c - 'A' + 0x0A;
+	} else if ('a' <= c && c <= 'f') {
+		return c - 'a' + 0x0a;
+	} else {
 		return -1;
-	return (isdigit(c) ? c - '0' : toupper(c) - 55);
+	}
 }
 
 // Fills newcolor with the color represented by the provided string.

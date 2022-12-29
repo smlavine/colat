@@ -117,9 +117,10 @@ fill_color(struct colorinfo *const restrict newcolor, const char *name)
 
 // Helper function to paint the screen with a given color.
 void
-paint(SDL_Renderer *renderer, struct color color)
+paint(SDL_Renderer *renderer, const struct colorinfo *color)
 {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_SetRenderDrawColor(renderer,
+		color->r, color->g, color->b, color->a);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 }
@@ -133,7 +134,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 	bool quit = false;
 	size_t index = 0;
 
-	paint(r, colors[index].c);
+	paint(r, &colors[index]);
 	puts(colors[index].s);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
@@ -150,7 +151,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 			case SDL_WINDOWEVENT_EXPOSED:
 			case SDL_WINDOWEVENT_RESIZED:
 			case SDL_WINDOWEVENT_MOVED:
-				paint(r, colors[index].c);
+				paint(r, &colors[index]);
 				break;
 			}
 			break;
@@ -167,7 +168,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 				// Shift to next image
 				if (index < n - 1) {
 					index++;
-					paint(r, colors[index].c);
+					paint(r, &colors[index]);
 					puts(colors[index].s);
 				}
 				break;
@@ -177,7 +178,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 				// Shift to previous image
 				if (index > 0) {
 					index--;
-					paint(r, colors[index].c);
+					paint(r, &colors[index]);
 					puts(colors[index].s);
 				}
 				break;

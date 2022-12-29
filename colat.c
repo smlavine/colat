@@ -112,7 +112,7 @@ fill_color(struct colorinfo *const restrict newcolor, const char *name)
 
 	newcolor->c = colorbits.c;
 	newcolor->s = name;
-	return 0;
+	return FILL_COLOR_OK;
 }
 
 // Helper function to paint the screen with a given color.

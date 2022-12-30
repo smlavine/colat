@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "debug.h"
 #include "err/err.h"
 
 struct color {

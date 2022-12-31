@@ -5,39 +5,41 @@
  * See LICENSE for details.
  */
 
-#include <assert.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "err/err.h"
 
-struct color {
-	// The order of this struct matters; it is cast from a Uint32 in
-	// fill_color().
-	Uint8 r;
-	Uint8 g;
-	Uint8 b;
-	Uint8 a;
+// The size in bytes of hexadecimal color strings that we can handle, not
+// counting a possible leading '#' character.
+enum {
+	_12BITLEN = 3,
+	_24BITLEN = 6,
 };
 
+// Maximum allowable color length + 1 for a possible '#' character.
+enum { COLORINFO_S_MAXLEN = _24BITLEN + 1 };
+
+// A color, along with the string that the user provided for it.
 struct colorinfo {
-	struct color c;
-	const char *s;
+	SDL_Color color;
+	char str[COLORINFO_S_MAXLEN + 1 /* for NUL */];
 };
 
-// Possible return values for fill_color().
-enum fill_color_status {
-	// fill_color() completed successfully.
-	FILL_COLOR_OK,
-	// fill_color() failed because the provided string contained a
+// Possible return values for strtocolor().
+enum strtocolor_value {
+	// strtocolor() completed successfully.
+	STRTOCOLOR_OK,
+	// strtocolor() failed because the provided string contained a
 	// non-hexadecimal character.
-	FILL_COLOR_NOT_HEX,
-	// fill_color() failed because the provided string was not the correct
-	// size for a 12-bit or 24-bit color.
-	FILL_COLOR_BAD_SIZE,
+	STRTOCOLOR_STR_INVALID,
+	// strtocolor() failed because the provided length was invalid. If the
+	// length was valid but simply inaccurate, then strtocolor() may
+	// deceptively return STRTOCOLOR_OK.
+	STRTOCOLOR_LEN_INVALID,
 };
 
 // Converts a hexadecimal char to an integer. If the provided char is
@@ -56,70 +58,108 @@ hextoi(char c)
 	}
 }
 
-// Fills newcolor with the color represented by the provided string.
-// See the definition of fill_color_status for the meaning of return values.
-enum fill_color_status
-fill_color(struct colorinfo *const restrict newcolor, const char *name)
+// Converts a hexadecimal color string str of length n to a SDL_Color.
+enum strtocolor_value
+strtocolor(SDL_Color *color, const char *str, size_t n)
 {
-	enum {
-		_12BITLEN = 3,
-		_24BITLEN = 6,
-		CHANNELS  = 3,
-		NIBBLE    = CHAR_BIT / 2,
+	enum { NIBBLE = CHAR_BIT / 2 };
+	int rr, r, gg, g, bb, b;
+
+	// Skip a leading '#' character, if one is present.
+	if (str[0] == '#') {
+		str++;
+		n--;
 	};
-	const char *s = name;
-	union {
-		struct color c;
-		Uint32 i;
-	} colorbits = { .c = {
-		.r = 0,
-		.g = 0,
-		.b = 0,
-		.a = SDL_ALPHA_OPAQUE
-	} };
 
-	// Allow for colors to begin like "#fff".
-	if (*s == '#')
-		s++;
-
-	assert(_12BITLEN == 3 && _24BITLEN == 6 && CHANNELS == 3);
-	switch (strnlen(s, _24BITLEN + 1)) {
+	switch (n) {
 	case _12BITLEN:
-		for (unsigned shift = 0; *s != '\0'; s++, shift += CHAR_BIT) {
-			int x = hextoi(*s);
-			if (x < 0) {
-				return FILL_COLOR_NOT_HEX;
-			}
-			colorbits.i |= ((Uint32)x << shift)
-				| ((Uint32)x << (shift + NIBBLE));
+		r = hextoi(*str++);
+		g = hextoi(*str++);
+		b = hextoi(*str++);
+		if (r < 0 || g < 0 || b < 0) {
+			return STRTOCOLOR_STR_INVALID;
 		}
+		color->r = (r << NIBBLE) + r;
+		color->g = (g << NIBBLE) + g;
+		color->b = (b << NIBBLE) + b;
 		break;
 	case _24BITLEN:
-		for (unsigned shift = NIBBLE; *s != '\0';
-				s += _24BITLEN / CHANNELS, shift += CHAR_BIT) {
-			int x1 = hextoi(*s), x2 = hextoi(*(s + 1));
-			if (x1 < 0 || x2 < 0) {
-				return FILL_COLOR_NOT_HEX;
-			}
-			colorbits.i |= ((Uint32)x1 << shift)
-				| ((Uint32)x2 << (shift - NIBBLE));
+		rr = hextoi(*str++);
+		r = hextoi(*str++);
+		gg = hextoi(*str++);
+		g = hextoi(*str++);
+		bb = hextoi(*str++);
+		b = hextoi(*str++);
+		if (rr < 0 || r < 0 || gg < 0 || g < 0 || bb < 0 || b < 0) {
+			return STRTOCOLOR_STR_INVALID;
 		}
+		color->r = (rr << NIBBLE) + r;
+		color->g = (gg << NIBBLE) + g;
+		color->b = (bb << NIBBLE) + b;
 		break;
 	default:
-		return FILL_COLOR_BAD_SIZE;
+		return STRTOCOLOR_LEN_INVALID;
+	}
+	color->a = SDL_ALPHA_OPAQUE;
+
+	return STRTOCOLOR_OK;
+}
+
+// Generates a random color.
+void
+randomize_colorinfo(struct colorinfo *color)
+{
+	enum { HEXAMT = 16 };
+	static const char hex[HEXAMT] = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'A', 'B', 'C', 'D', 'E', 'F',
+	};
+	color->str[0] = '#';
+	for (size_t i = 1; i < COLORINFO_S_MAXLEN; i++) {
+		color->str[i] = hex[rand() % HEXAMT];
+	}
+	color->str[COLORINFO_S_MAXLEN] = '\0';
+	strtocolor(&color->color, color->str, COLORINFO_S_MAXLEN);
+}
+
+// Initializes SDL objects. Returns 0 on success, negative on failure.
+// On success, SDL_Quit is registered with atexit(3).
+int
+init_sdl(SDL_Window **windowp, SDL_Renderer **rendererp)
+{
+	const int WIDTH = 400, HEIGHT = 400;
+
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		ewarn("Error initializing SDL: %s", SDL_GetError());
+		return -1;
+	}
+	atexit(SDL_Quit);
+
+	*windowp = SDL_CreateWindow("colat",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		WIDTH, HEIGHT,
+		SDL_WINDOW_RESIZABLE);
+	if (*windowp == NULL) {
+		ewarn("Error creating window: %s", SDL_GetError());
+		return -1;
 	}
 
-	newcolor->c = colorbits.c;
-	newcolor->s = name;
-	return FILL_COLOR_OK;
+	*rendererp = SDL_CreateRenderer(*windowp, -1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if (*rendererp == NULL) {
+		SDL_DestroyWindow(*windowp);
+		ewarn("Error creating renderer: %s", SDL_GetError());
+		return -1;
+	}
+
+	return 0;
 }
 
 // Helper function to paint the screen with a given color.
 void
-paint(SDL_Renderer *renderer, const struct colorinfo *color)
+paint(SDL_Renderer *renderer, SDL_Color color)
 {
-	SDL_SetRenderDrawColor(renderer,
-		color->r, color->g, color->b, color->a);
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 }
@@ -133,8 +173,8 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 	bool quit = false;
 	size_t index = 0;
 
-	paint(r, &colors[index]);
-	puts(colors[index].s);
+	paint(r, colors[index].color);
+	puts(colors[index].str);
 	while (!quit) {
 		if (SDL_WaitEvent(&event) == 0) {
 			ewarn("SDL_WaitEvent() error: %s", SDL_GetError());
@@ -150,7 +190,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 			case SDL_WINDOWEVENT_EXPOSED:
 			case SDL_WINDOWEVENT_RESIZED:
 			case SDL_WINDOWEVENT_MOVED:
-				paint(r, &colors[index]);
+				paint(r, colors[index].color);
 				break;
 			}
 			break;
@@ -167,8 +207,8 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 				// Shift to next image
 				if (index < n - 1) {
 					index++;
-					paint(r, &colors[index]);
-					puts(colors[index].s);
+					paint(r, colors[index].color);
+					puts(colors[index].str);
 				}
 				break;
 			case SDLK_BACKSPACE:
@@ -177,8 +217,8 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 				// Shift to previous image
 				if (index > 0) {
 					index--;
-					paint(r, &colors[index]);
-					puts(colors[index].s);
+					paint(r, colors[index].color);
+					puts(colors[index].str);
 				}
 				break;
 			}
@@ -189,60 +229,103 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 	return 0;
 }
 
+// Prints usage information to the provided file.
+void
+usage(FILE *out)
+{
+	fprintf(out,
+		"usage: %s [-h] [-r amt] [colors...]\n"
+		"-h\tPrints this usage information.\n"
+		"-r amt\tDisplays `amt` randomly generated 24-bit colors in addition to\n"
+		"      \tcolors provided on the command line.\n"
+		"\n"
+		"Colors can be specified as 12- or 24-bit hexadecimal,\n"
+		"and can optionally begin with a '#' character.\n"
+		"If -r isn't used, at least one color must be provided.\n"
+		"More information can be found at <https://sr.ht/~smlavine/colat>.\n",
+		program_invocation_name);
+}
+
 int
 main(int argc, char *argv[])
 {
+	int opt, ret;
+	long l;
+	size_t r, colors_cap, ci;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-	int ret;
-
-	// Quit if no color arguments.
-	if (argc < 2)
-		return EXIT_SUCCESS;
 
 	program_invocation_name = argv[0];
 
-	struct colorinfo colors[argc - 1];
-	for (int i = 1; i < argc; i++) {
-		switch (fill_color(&colors[i - 1], argv[i])) {
-		case FILL_COLOR_OK:
+	r = 0;
+
+	while ((opt = getopt(argc, argv, "hr:")) != -1) {
+		switch (opt) {
+		case 'h':
+			usage(stdout);
+			exit(EXIT_SUCCESS);
 			break;
-		case FILL_COLOR_NOT_HEX:
-			warn("%s contains a bad character.\n", argv[i]);
-			return EXIT_FAILURE;
-		case FILL_COLOR_BAD_SIZE:
-			warn("%s is not a valid length.\n", argv[i]);
-			return EXIT_FAILURE;
+		case 'r':
+			l = strtol(optarg, NULL, 10);
+			if (l < 0) {
+				err("-r: amt cannot be negative");
+			} else if (l == 0) {
+				// Also covers the case where the string
+				// cannot be converted.
+				err("-r: amt cannot be zero");
+			} else if (l == LONG_MAX) {
+				err("-r");
+			}
+			r = strtoul(optarg, NULL, 10);
+			break;
+		case '?':
+			exit(EXIT_FAILURE);
+			break;
+		default:
+			abort();
+			break;
 		}
 	}
 
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		err("Error initializing SDL: %s", SDL_GetError());
-	}
-	atexit(SDL_Quit);
-
-	window = SDL_CreateWindow("colat",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		400, 400,
-		SDL_WINDOW_RESIZABLE);
-	if (window == NULL) {
-		err("Error creating window: %s", SDL_GetError());
+	if ((colors_cap = argc - optind + r) == 0) {
+		err("no colors provided");
 	}
 
-	renderer = SDL_CreateRenderer(window, -1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (renderer == NULL) {
-		SDL_DestroyWindow(window);
-		err("Error creating renderer: %s", SDL_GetError());
+	struct colorinfo colors[colors_cap];
+
+	// Fill random colors
+	srand(time(NULL));
+	for (ci = 0; ci < r; ci++) {
+		randomize_colorinfo(&colors[ci]);
 	}
 
-	if (run(renderer, colors, argc - 1) == 0) {
+	// Fill command-line colors
+	for (int ai = optind; ai < argc; ci++, ai++) {
+		int n = snprintf(colors[ci].str, sizeof(colors[ci].str),
+			"%s", argv[ai]);
+		switch (strtocolor(&colors[ci].color, colors[ci].str, n)) {
+		case STRTOCOLOR_OK:
+			break;
+		case STRTOCOLOR_STR_INVALID:
+			warn("%s contains a bad character.\n", colors[ci].str);
+			return EXIT_FAILURE;
+		case STRTOCOLOR_LEN_INVALID:
+			warn("%s is not a valid length.\n", argv[ai]);
+			return EXIT_FAILURE;
+		default:
+			abort();
+		}
+	}
+
+	if (init_sdl(&window, &renderer) < 0)
+		return EXIT_FAILURE;
+
+	if (run(renderer, colors, colors_cap) == 0) {
 		ret = EXIT_SUCCESS;
 	} else {
 		ret = EXIT_FAILURE;
 	}
 
-	// Clean up SDL objects.
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 

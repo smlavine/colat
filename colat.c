@@ -194,7 +194,7 @@ run(SDL_Renderer *r, const struct colorinfo *colors, size_t n)
 				break;
 			}
 			break;
-		case SDL_KEYUP:
+		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_q:
 			case SDLK_ESCAPE:

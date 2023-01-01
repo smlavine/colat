@@ -44,7 +44,7 @@ enum strtocolor_value {
 
 // Converts a hexadecimal char to an integer. If the provided char is
 // not hexadecimal, then a negative value is returned.
-int
+int8_t
 hextoi(char c)
 {
 	if ('0' <= c && c <= '9') {
@@ -63,7 +63,7 @@ enum strtocolor_value
 strtocolor(SDL_Color *color, const char *str, size_t n)
 {
 	enum { NIBBLE = CHAR_BIT / 2 };
-	int rr, r, gg, g, bb, b;
+	int8_t rr, r, gg, g, bb, b;
 
 	// Skip a leading '#' character, if one is present.
 	if (str[0] == '#') {

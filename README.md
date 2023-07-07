@@ -21,6 +21,5 @@ Simply run `make`.
 
 # Copyright
 
-See [LICENSE][0].
-
-[0]: https://git.sr.ht/~smlavine/colat/tree/master/item/LICENSE
+See [LICENSES](https://git.sr.ht/~smlavine/colat/tree/master/item/LICENSES/)
+and individual files for license information.

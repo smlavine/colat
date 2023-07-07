@@ -1,16 +1,19 @@
-# [colat](https://git.sr.ht/~smlavine/colat)
+# [colat](https://sr.ht/~smlavine/colat)
 
-Simple program to show what hexadecimal colors actually look like.
-
-I wrote this a long time ago, and there is much that can be improved.
+Simple SDL program that displays colors.
 
 # Usage
 
 ```
-colat <colors>
-```
+usage: ./colat [-h] [-r amt] [colors...]
+-h      Prints this usage information.
+-r amt  Displays `amt` randomly generated 24-bit colors in addition to
+        colors provided on the command line.
 
-Colat supports "#RGB" and "#RRGGBB" syntaxes.
+Colors can be specified as 12- or 24-bit hexadecimal,
+and can optionally begin with a '#' character.
+If -r isn't used, at least one color must be provided.
+```
 
 # Building
 

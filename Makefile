@@ -2,7 +2,7 @@
 
 include config.mk
 
-SRC = colat.c err/err.c
+SRC = colat.c vendor/err/err.c
 OBJ = $(SRC:.c=.o)
 
 all: options colat

@@ -11,7 +11,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "err/err.h"
+#include "vendor/err/err.h"
 
 // The size in bytes of hexadecimal color strings that we can handle, not
 // counting a possible leading '#' character.

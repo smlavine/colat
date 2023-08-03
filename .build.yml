@@ -12,10 +12,9 @@ sources:
 tasks:
   - gcc: |
       cd colat
-      sed -i 's/CC = .*/CC = gcc/' config.mk
-      make
+      make clean
+      make CC=gcc
   - clang: |
       cd colat
-      sed -i 's/CC = .*/CC = clang/' config.mk
       make clean
-      make
+      make CC=clang
